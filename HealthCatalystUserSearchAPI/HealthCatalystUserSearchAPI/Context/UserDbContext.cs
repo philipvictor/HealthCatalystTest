@@ -111,6 +111,19 @@ namespace HealthCatalystUserSearchAPI.Data
                 InterestName = "Cooking"
             };
 
+            var interestThree = new
+            {
+                Id = new Guid("538afe79-3653-4061-b597-3011d79c3630"),
+                InterestName = "Rugby",
+                InterestType = "Sport"
+            };
+
+            var interestFour = new
+            {
+                Id = new Guid("98d60074-3ad1-4803-807f-6922982665ae"),
+                InterestName = "Baking"
+            };
+
             modelBuilder.Entity<Addresses>().HasData(
                 addressOne,
                 addressTwo);
@@ -118,7 +131,9 @@ namespace HealthCatalystUserSearchAPI.Data
 
             modelBuilder.Entity<Interests>().HasData(
                 interestOne,
-                interestTwo);
+                interestTwo,
+                interestThree,
+                interestFour);
 
 
             modelBuilder.Entity<Users>().HasData(
@@ -129,7 +144,9 @@ namespace HealthCatalystUserSearchAPI.Data
             modelBuilder.Entity<UserToInterest>().HasData(
                 new { UserId = userOne.Id, InterestId = interestTwo.Id },
                 new { UserId = userThree.Id, InterestId = interestTwo.Id },
-                new { UserId = userTwo.Id, InterestId = interestOne.Id });
+                new { UserId = userThree.Id, InterestId = interestFour.Id },
+                new { UserId = userTwo.Id, InterestId = interestOne.Id },
+                new { UserId = userTwo.Id, InterestId = interestThree.Id });
 
         }
     }
