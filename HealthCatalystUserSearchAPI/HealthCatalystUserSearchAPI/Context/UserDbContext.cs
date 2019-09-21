@@ -1,8 +1,7 @@
-﻿using HealthCatalystUserSearchAPI.Context;
+﻿using System;
 using Microsoft.EntityFrameworkCore;
-using System;
 
-namespace HealthCatalystUserSearchAPI.Data
+namespace HealthCatalystUserSearchAPI.Context
 {
     public class UserDbContext: DbContext
     {
@@ -14,6 +13,7 @@ namespace HealthCatalystUserSearchAPI.Data
         public DbSet<Users> Users { get; set; }
         public DbSet<Interests> Interests { get; set; }
         public DbSet<Addresses> Addresses { get; set; }
+        public DbSet<UserToInterest> UserToInterest { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

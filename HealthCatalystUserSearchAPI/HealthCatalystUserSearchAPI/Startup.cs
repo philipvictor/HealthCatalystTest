@@ -3,7 +3,7 @@ using System.IO;
 using System.Reflection;
 using AutoMapper;
 using HealthCatalystUserSearchAPI.AutoMapper;
-using HealthCatalystUserSearchAPI.Data;
+using HealthCatalystUserSearchAPI.Context;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -45,7 +45,7 @@ namespace HealthCatalystUserSearchAPI
             var mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
 
-
+            services.ConfigureCors();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 

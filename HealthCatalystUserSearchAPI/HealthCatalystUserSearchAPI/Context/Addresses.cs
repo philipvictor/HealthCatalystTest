@@ -26,5 +26,10 @@ namespace HealthCatalystUserSearchAPI.Context
         public string ZipCode { get; set; }
 
         public ICollection<Users> Users { get; set; }
+
+        public Addresses()
+        {
+            Street2 = string.Empty;
+        }
     }
 }

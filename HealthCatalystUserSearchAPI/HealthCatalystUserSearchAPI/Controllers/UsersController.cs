@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HealthCatalystUserSearchAPI.Context;
-using HealthCatalystUserSearchAPI.Data;
+using HealthCatalystUserSearchAPI.JsonHelpers;
 using HealthCatalystUserSearchAPI.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace HealthCatalystUserSearchAPI.Controllers
 {
@@ -54,7 +57,7 @@ namespace HealthCatalystUserSearchAPI.Controllers
         {
             if (id == Guid.Empty || !UsersExists(id))
             {
-                return NotFound();
+                return new JsonErrorResult(new { message = "The id parameter is invalid" }, HttpStatusCode.BadRequest);
             }
 
             var theUser = await _context.Users.Where(u => u.Id == id)
@@ -67,7 +70,7 @@ namespace HealthCatalystUserSearchAPI.Controllers
 
             if (users == null)
             {
-                return NotFound();
+                return new JsonErrorResult(new {message = "No Users were found for the provided parameters"}, HttpStatusCode.NotFound);
             }
 
             var returnUserDto = _mapper.Map<UserDto>(theUser);
@@ -102,7 +105,7 @@ namespace HealthCatalystUserSearchAPI.Controllers
             // If none found.
             if (!interests.Any())
             {
-                return NotFound();
+                return new JsonErrorResult(new { message = "No Interests were found for the provided parameters" }, HttpStatusCode.NotFound);
             }
 
             // Get the users.
@@ -128,7 +131,7 @@ namespace HealthCatalystUserSearchAPI.Controllers
         {
             if (string.IsNullOrEmpty(lastname))
             {
-                return NotFound();
+                return new JsonErrorResult(new { message = "The lastname parameter is invalid" }, HttpStatusCode.BadRequest);
             }
 
             // Build query.
@@ -148,7 +151,7 @@ namespace HealthCatalystUserSearchAPI.Controllers
             // If none found.
             if (!theUsers.Any())
             {
-                return NotFound();
+                return new JsonErrorResult(new { message = "No Users were found for the provided parameters" }, HttpStatusCode.NotFound);
             }
 
             var returnUserDto = _mapper.Map<List<UserDto>>(theUsers);
@@ -156,52 +159,79 @@ namespace HealthCatalystUserSearchAPI.Controllers
             return Ok(returnUserDto);
         }
 
-        // PUT: api/Users/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUsers([FromRoute] Guid id, [FromBody] Users users)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        ///// <summary>
+        ///// Update a User in the database.
+        ///// </summary>
+        ///// <param name="id">The User Id for the User to be updated.</param>
+        ///// <param name="user">The user to update as a JSON document.</param>
+        ///// <returns></returns>
+        ////[HttpPut("{id}")]
+        ////public async Task<IActionResult> PutUsers([FromRoute] Guid id, [FromBody] UserDto user)
+        ////{
+        ////    if (!ModelState.IsValid)
+        ////    {
+        ////        return BadRequest(ModelState);
+        ////    }
 
-            if (id != users.Id)
-            {
-                return BadRequest();
-            }
+        ////    if (id == Guid.Empty || !UsersExists(id))
+        ////    {
+        ////        return new JsonErrorResult(new { message = "The id parameter is invalid" }, HttpStatusCode.BadRequest);
+        ////    }
 
-            _context.Entry(users).State = EntityState.Modified;
+        ////    if (id != new Guid(user.Id))
+        ////    {
+        ////        return new JsonErrorResult(new { message = "The id parameter does not match the User Id." }, HttpStatusCode.BadRequest);
+        ////    }
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UsersExists(id))
-                {
-                    return NotFound();
-                }
 
-                throw;
-            }
 
-            return NoContent();
-        }
 
-        // POST: api/Users
+        ////    _context.Entry(user).State = EntityState.Modified;
+
+        ////    try
+        ////    {
+        ////        await _context.SaveChangesAsync();
+        ////    }
+        ////    catch (DbUpdateConcurrencyException)
+        ////    {
+        ////        if (!UsersExists(id))
+        ////        {
+        ////            return NotFound();
+        ////        }
+
+        ////        throw;
+        ////    }
+
+        ////    return NoContent();
+        ////}
+
+        /// <summary>
+        /// Add a user to the application.
+        /// </summary>
+        /// <param name="user">The user to add as a JSON document.</param>
+        /// <returns>A status of the action.</returns>
         [HttpPost]
-        public async Task<IActionResult> PostUsers([FromBody] Users users)
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> PostUser([FromBody] UserDto user)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.Users.Add(users);
+            AddInterestsForPost(user);
+
+            var theAddress = DetermineTheAddressForPost(user);
+
+            var newUsers = _mapper.Map<Users>(user);
+            newUsers.MyAddress = theAddress;
+            _context.Users.Add(newUsers);
+
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUsers", new { id = users.Id }, users);
+            return CreatedAtAction("PostUser", new { id = user.Id}, user);
         }
 
         // DELETE: api/Users/5
@@ -233,6 +263,68 @@ namespace HealthCatalystUserSearchAPI.Controllers
         private bool UsersExists(Guid id)
         {
             return _context.Users.Any(e => e.Id == id);
+        }
+
+        /// <summary>
+        /// Determine the Address for a Post by seeing if it already exists in the database before adding.
+        /// </summary>
+        /// <param name="user">The User information being Posted.</param>
+        /// <returns>The proper address.</returns>
+        private Addresses DetermineTheAddressForPost(UserDto user)
+        {
+            var existingAddress = _context.Addresses
+                .First(z => z.City.Equals(user.MyAddress.City, StringComparison.InvariantCultureIgnoreCase) &&
+                            z.Country.Equals(user.MyAddress.Country, StringComparison.InvariantCultureIgnoreCase) &&
+                            z.State.Equals(user.MyAddress.State, StringComparison.InvariantCultureIgnoreCase) &&
+                            z.Street1.Equals(user.MyAddress.Street1, StringComparison.InvariantCultureIgnoreCase) &&
+                            z.Street2.Equals(user.MyAddress.Street2, StringComparison.InvariantCultureIgnoreCase) &&
+                            z.ZipCode.Equals(user.MyAddress.ZipCode, StringComparison.InvariantCultureIgnoreCase));
+
+            Addresses theAddress;
+            if (existingAddress == null)
+            {
+                theAddress = _mapper.Map<Addresses>(user.MyAddress);
+                _context.Addresses.Add(theAddress);
+            }
+            else
+            {
+                theAddress = _mapper.Map<Addresses>(existingAddress);
+            }
+
+            return theAddress;
+        }
+
+        /// <summary>
+        /// Add any Interests from a Post that do not already exist in the database.
+        /// </summary>
+        /// <param name="user">The User information being Posted.</param>
+        private void AddInterestsForPost(UserDto user)
+        {
+            var newInterests = _mapper.Map<ICollection<Interests>>(user.MyInterests);
+            foreach (var interest in newInterests)
+            {
+                var existingInterest = _context.Interests.First(f => f.InterestName.Equals(interest.InterestName) && f.InterestType.Equals(interest.InterestType));
+
+                if (existingInterest == null)
+                {
+                    _context.Interests.Add(interest);
+                    var newUserToInterest = new UserToInterest
+                    {
+                        InterestId = interest.Id,
+                        UserId = new Guid(user.Id)
+                    };
+                    _context.UserToInterest.Add(newUserToInterest);
+                }
+                else
+                {
+                    var newUserToInterest = new UserToInterest
+                    {
+                        InterestId = existingInterest.Id,
+                        UserId = new Guid(user.Id)
+                    };
+                    _context.UserToInterest.Add(newUserToInterest);
+                }
+            }
         }
     }
 }

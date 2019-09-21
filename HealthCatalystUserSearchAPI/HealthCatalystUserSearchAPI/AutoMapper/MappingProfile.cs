@@ -10,8 +10,11 @@ namespace HealthCatalystUserSearchAPI.AutoMapper
         public MappingProfile()
         {
             CreateMap<Users, UserDto>()
-                .ForMember(dest => dest.MyInterests, opt => opt.MapFrom(src => src.MyInterests.Select(b => b.Interest)))
-                .ReverseMap();
+                .ForMember(dest => dest.MyInterests, opt => opt.MapFrom(src => src.MyInterests.Select(b => b.Interest)));
+
+            CreateMap<UserDto, Users>()
+                .ForMember(u => u.MyInterests, opt => opt.Ignore())
+                .ForMember(u => u.MyAddress, opt => opt.Ignore());
 
             CreateMap<Addresses, AddressDto>().ReverseMap();
 
@@ -20,6 +23,7 @@ namespace HealthCatalystUserSearchAPI.AutoMapper
             CreateMap<UserToInterest, UserToInterestDto>()
                 .ForAllMembers(dest => dest.Ignore());
 
+            CreateMap<UserToInterestDto, UserToInterest>();
         }
     }
 }
