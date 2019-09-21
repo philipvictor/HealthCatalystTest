@@ -1,4 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿
+using HealthCatalystUserSearchAPI.Context;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HealthCatalystUserSearchAPI
 {
@@ -15,4 +19,12 @@ namespace HealthCatalystUserSearchAPI
                         .AllowCredentials());
             });
         }
+
+        public static void ConfigureMySqlContext(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddDbContext<UserDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("myconn")));
+        }
     }
+
+
+}
