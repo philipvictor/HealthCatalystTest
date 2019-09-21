@@ -159,52 +159,7 @@ namespace HealthCatalystUserSearchAPI.Controllers
             return Ok(returnUserDto);
         }
 
-        ///// <summary>
-        ///// Update a User in the database.
-        ///// </summary>
-        ///// <param name="id">The User Id for the User to be updated.</param>
-        ///// <param name="user">The user to update as a JSON document.</param>
-        ///// <returns></returns>
-        ////[HttpPut("{id}")]
-        ////public async Task<IActionResult> PutUsers([FromRoute] Guid id, [FromBody] UserDto user)
-        ////{
-        ////    if (!ModelState.IsValid)
-        ////    {
-        ////        return BadRequest(ModelState);
-        ////    }
-
-        ////    if (id == Guid.Empty || !UsersExists(id))
-        ////    {
-        ////        return new JsonErrorResult(new { message = "The id parameter is invalid" }, HttpStatusCode.BadRequest);
-        ////    }
-
-        ////    if (id != new Guid(user.Id))
-        ////    {
-        ////        return new JsonErrorResult(new { message = "The id parameter does not match the User Id." }, HttpStatusCode.BadRequest);
-        ////    }
-
-
-
-
-        ////    _context.Entry(user).State = EntityState.Modified;
-
-        ////    try
-        ////    {
-        ////        await _context.SaveChangesAsync();
-        ////    }
-        ////    catch (DbUpdateConcurrencyException)
-        ////    {
-        ////        if (!UsersExists(id))
-        ////        {
-        ////            return NotFound();
-        ////        }
-
-        ////        throw;
-        ////    }
-
-        ////    return NoContent();
-        ////}
-
+      
         /// <summary>
         /// Add a user to the application.
         /// </summary>
@@ -218,7 +173,7 @@ namespace HealthCatalystUserSearchAPI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return new JsonErrorResult(new { message = "Bad User definition." }, HttpStatusCode.BadRequest);
             }
 
             AddInterestsForPost(user);
@@ -233,27 +188,6 @@ namespace HealthCatalystUserSearchAPI.Controllers
 
             return CreatedAtAction("PostUser", new { id = user.Id}, user);
         }
-
-        // DELETE: api/Users/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteUsers([FromRoute] Guid id)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    var users = await _context.Users.FindAsync(id);
-        //    if (users == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.Users.Remove(users);
-        //    await _context.SaveChangesAsync();
-
-        //    return Ok(users);
-        //}
 
         /// <summary>
         /// Determine if the user is in the database
