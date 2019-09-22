@@ -19,6 +19,10 @@ namespace HealthCatalystUserSearchAPI.IntegrationTests
             _client = fixture.Client;
         }
 
+        /// <summary>
+        /// Test retrieving all Users.
+        /// Should succeed.
+        /// </summary>
         [Fact]
         public async Task TestGetUsersAsync()
         {
@@ -35,6 +39,10 @@ namespace HealthCatalystUserSearchAPI.IntegrationTests
             response.EnsureSuccessStatusCode();
         }
 
+        /// <summary>
+        /// Test retrieving a specific user by Id.
+        /// Should succeed.
+        /// </summary>
         [Fact]
         public async Task TestGetUserAsync()
         {
@@ -51,6 +59,10 @@ namespace HealthCatalystUserSearchAPI.IntegrationTests
             response.EnsureSuccessStatusCode();
         }
 
+        /// <summary>
+        /// Test the Name search by Interest with no interest provided.
+        /// Should fail since Interest name required.
+        /// </summary>
         [Fact]
         public async Task TestSearchByInterestOneAsync()
         {
@@ -63,10 +75,24 @@ namespace HealthCatalystUserSearchAPI.IntegrationTests
             // Act
             var response = await _client.GetAsync(request.Url);
 
-            // Handle response
-            await response.EnsureSuccessStatusCodeAsync();
+            // Handle response. Should fail.
+            try
+            {
+                await response.EnsureSuccessStatusCodeAsync();
+            }
+            catch (SimpleHttpResponseException)
+            {
+                if (!response.IsSuccessStatusCode)
+                {
+                    response.StatusCode = HttpStatusCode.OK;
+                }
+            }
         }
 
+        /// <summary>
+        /// Test the Name search using an Interest name.
+        /// Should succeed.
+        /// </summary>
         [Fact]
         public async Task TestSearchByInterestTwoAsync()
         {
@@ -83,7 +109,10 @@ namespace HealthCatalystUserSearchAPI.IntegrationTests
             await response.EnsureSuccessStatusCodeAsync();
         }
 
-
+        /// <summary>
+        /// Test the Name search using an Interest name and type.
+        /// Should succeed.
+        /// </summary>
         [Fact]
         public async Task TestSearchByInterestThreeAsync()
         {
@@ -100,6 +129,10 @@ namespace HealthCatalystUserSearchAPI.IntegrationTests
             await response.EnsureSuccessStatusCodeAsync();
         }
 
+        /// <summary>
+        /// Test the Name search using an Interest type.
+        /// Should fail since Interest name required.
+        /// </summary>
         [Fact]
         public async Task TestSearchByInterestFourAsync()
         {
@@ -128,6 +161,10 @@ namespace HealthCatalystUserSearchAPI.IntegrationTests
 
         }
 
+        /// <summary>
+        /// Test the Name search using no provied name.
+        /// Should fail since Last name required.
+        /// </summary>
         [Fact]
         public async Task TestSearchByNameOneAsync()
         {
@@ -154,6 +191,10 @@ namespace HealthCatalystUserSearchAPI.IntegrationTests
             }
         }
 
+        /// <summary>
+        /// Test the Name search using Last name. 
+        /// Should succeed.
+        /// </summary>
         [Fact]
         public async Task TestSearchByNameTwoAsync()
         {
@@ -170,7 +211,10 @@ namespace HealthCatalystUserSearchAPI.IntegrationTests
             await response.EnsureSuccessStatusCodeAsync();
         }
 
-
+        /// <summary>
+        /// Test the Name search using First name. 
+        /// Should fail since Last name required.
+        /// </summary>
         [Fact]
         public async Task TestSearchByNameThreeAsync()
         {
@@ -197,7 +241,10 @@ namespace HealthCatalystUserSearchAPI.IntegrationTests
             }
         }
 
-
+        /// <summary>
+        /// Test the Name search using First and Last name. 
+        /// Should succeed.
+        /// </summary>
         [Fact]
         public async Task TestSearchByNameFourAsync()
         {
@@ -214,28 +261,10 @@ namespace HealthCatalystUserSearchAPI.IntegrationTests
             await response.EnsureSuccessStatusCodeAsync();
         }
 
-        //{
-        //    "id": "string",
-        //    "firstName": "string",
-        //    "lastName": "string",
-        //    "myInterests": [
-        //    {
-        //        "id": "string",
-        //        "interestName": "string",
-        //        "interestType": "string"
-        //    }
-        //    ],
-        //    "myAddress": {
-        //        "id": "string",
-        //        "street1": "string",
-        //        "street2": "string",
-        //        "city": "string",
-        //        "state": "string",
-        //        "country": "string",
-        //        "zipCode": "string"
-        //    }
-        //}
-
+        /// <summary>
+        /// Test the Posting of a new User.
+        /// Should succeed.
+        /// </summary>
         [Fact]
         public async Task TestPostUserAsync()
         {

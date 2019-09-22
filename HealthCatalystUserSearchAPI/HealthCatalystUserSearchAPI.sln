@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28307.852
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HealthCatalystUserSearchAPI", "HealthCatalystUserSearchAPI\HealthCatalystUserSearchAPI.csproj", "{737E9A42-6602-4219-A5A1-0474DD44D9E6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HealthCatalystUserSearchAPI.UnitTests", "XUnitTestProject\HealthCatalystUserSearchAPI.UnitTests.csproj", "{98AC99FE-E783-4440-B2E7-286FAE222B51}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HealthCatalystUserSearchAPI.UnitTests", "HealthCatalystUserSearchAPI.UnitTests\HealthCatalystUserSearchAPI.UnitTests.csproj", "{98AC99FE-E783-4440-B2E7-286FAE222B51}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HealthCatalystUserSearchAPI.IntegrationTests", "HealthCatalystUserSeachAPI.IntegrationTests\HealthCatalystUserSearchAPI.IntegrationTests.csproj", "{B74BC015-3574-4686-8B2F-28F41CD38AE0}"
 EndProject

@@ -38,12 +38,12 @@ namespace HealthCatalystUserSearchAPI.Controllers
             var theUsers = await _context.Users
                 .Include(u => u.MyAddress)
                 .Include(u => u.MyInterests)
-                    .ThenInclude(i => i.Interest)
+                .ThenInclude(i => i.Interest)
                 .ToListAsync();
 
             var returnUserDtos = _mapper.Map<List<UserDto>>(theUsers);
-    
-            return Ok(returnUserDtos); 
+
+            return Ok(returnUserDtos);
         }
 
         // GET: api/Users/5
@@ -63,14 +63,15 @@ namespace HealthCatalystUserSearchAPI.Controllers
             var theUser = await _context.Users.Where(u => u.Id == id)
                 .Include(u => u.MyAddress)
                 .Include(u => u.MyInterests)
-                    .ThenInclude(i => i.Interest)
+                .ThenInclude(i => i.Interest)
                 .FirstOrDefaultAsync();
 
             var users = await _context.Users.FindAsync(id);
 
             if (users == null)
             {
-                return new JsonErrorResult(new {message = "No Users were found for the provided parameters"}, HttpStatusCode.NotFound);
+                return new JsonErrorResult(new { message = "No Users were found for the provided parameters" },
+                    HttpStatusCode.NotFound);
             }
 
             var returnUserDto = _mapper.Map<UserDto>(theUser);
@@ -81,23 +82,28 @@ namespace HealthCatalystUserSearchAPI.Controllers
         /// <summary>
         /// Search for Users by Interests
         /// </summary>
-        /// <param name="interestname">The name of the Interest</param>
+        /// <param name="interestname">REQUIRED : The name of the Interest</param>
         /// <param name="interesttype">The type of the Interest</param>
         /// <returns>A JSON document of the users that follow that interest.</returns>
         [HttpGet("SearchByInterest")]
         public async Task<IActionResult> SearchByInterest(string interestname, string interesttype)
         {
+            if (string.IsNullOrEmpty(interestname))
+            {
+                return new JsonErrorResult(new { message = "The interestname parameter is invalid" },
+                    HttpStatusCode.BadRequest);
+            }
+
             // Build Query
             var query = _context.Interests.AsQueryable();
 
-            if (!string.IsNullOrEmpty(interestname))
-            {
-                query = query.Where(interest => interest.InterestName.Equals(interestname, StringComparison.InvariantCultureIgnoreCase));
-            }
+            query = query.Where(interest =>
+                interest.InterestName.Equals(interestname, StringComparison.InvariantCultureIgnoreCase));
 
             if (!string.IsNullOrEmpty(interesttype))
             {
-                query = query.Where(a => a.InterestType.Equals(interesttype, StringComparison.InvariantCultureIgnoreCase));
+                query = query.Where(a =>
+                    a.InterestType.Equals(interesttype, StringComparison.InvariantCultureIgnoreCase));
             }
 
             var interests = query.Select(a => a.Id).ToList();
@@ -105,14 +111,15 @@ namespace HealthCatalystUserSearchAPI.Controllers
             // If none found.
             if (!interests.Any())
             {
-                return new JsonErrorResult(new { message = "No Interests were found for the provided parameters" }, HttpStatusCode.NotFound);
+                return new JsonErrorResult(new { message = "No Interests were found for the provided parameters" },
+                    HttpStatusCode.NotFound);
             }
 
             // Get the users.
             var theUsers = await _context.Users
                 .Include(u => u.MyAddress)
                 .Include(u => u.MyInterests)
-                    .ThenInclude(i => i.Interest)
+                .ThenInclude(i => i.Interest)
                 .Where(u => u.MyInterests.Any(f => interests.Contains(f.InterestId))).ToListAsync();
 
             var returnUserDto = _mapper.Map<List<UserDto>>(theUsers);
@@ -123,7 +130,7 @@ namespace HealthCatalystUserSearchAPI.Controllers
         /// <summary>
         /// Search for Users by Name.
         /// </summary>
-        /// <param name="lastname">Required: The first name of the User</param>
+        /// <param name="lastname">REQUIRED : The first name of the User</param>
         /// <param name="firstname">The last name of the User</param>
         /// <returns>A JSON document of the users that follow that interest.</returns>
         [HttpGet("SearchByName")]
@@ -131,7 +138,8 @@ namespace HealthCatalystUserSearchAPI.Controllers
         {
             if (string.IsNullOrEmpty(lastname))
             {
-                return new JsonErrorResult(new { message = "The lastname parameter is invalid" }, HttpStatusCode.BadRequest);
+                return new JsonErrorResult(new { message = "The lastname parameter is invalid" },
+                    HttpStatusCode.BadRequest);
             }
 
             // Build query.
@@ -151,7 +159,8 @@ namespace HealthCatalystUserSearchAPI.Controllers
             // If none found.
             if (!theUsers.Any())
             {
-                return new JsonErrorResult(new { message = "No Users were found for the provided parameters" }, HttpStatusCode.NotFound);
+                return new JsonErrorResult(new { message = "No Users were found for the provided parameters" },
+                    HttpStatusCode.NotFound);
             }
 
             var returnUserDto = _mapper.Map<List<UserDto>>(theUsers);
@@ -159,7 +168,12 @@ namespace HealthCatalystUserSearchAPI.Controllers
             return Ok(returnUserDto);
         }
 
-      
+        //TODO
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutUsers([FromRoute] Guid id, [FromBody] Users users)
+        //{
+        //}
+
         /// <summary>
         /// Add a user to the application.
         /// </summary>
@@ -186,8 +200,14 @@ namespace HealthCatalystUserSearchAPI.Controllers
 
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("PostUser", new { id = user.Id}, user);
+            return CreatedAtAction("PostUser", new { id = user.Id }, user);
         }
+
+        //TODO
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteUsers([FromRoute] Guid id)
+        //{
+        //}
 
         /// <summary>
         /// Determine if the user is in the database
