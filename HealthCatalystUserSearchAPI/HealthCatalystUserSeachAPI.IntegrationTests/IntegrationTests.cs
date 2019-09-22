@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using HealthCatalystUserSearchAPI.Models;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace HealthCatalystUserSearchAPI.IntegrationTests
@@ -236,41 +239,43 @@ namespace HealthCatalystUserSearchAPI.IntegrationTests
         [Fact]
         public async Task TestPostUserAsync()
         {
-            var stringjsonData = "{" +
-                                 "\"id\": \"77427be4-570b-4b2a-886c-92b41a354029\"," +
-                                 "\"firstName\": \"Jane\"," +
-                                 "\"lastName\": \"Tarzan\"," +
-                                 "\"myInterests\": [" +
-                                     "{" +
-                                     "\"id\": \"5f15bd8a-25cd-46b1-8f79-6aa70043eb71\"," +
-                                     "\"interestName\": \"Vine Swinging\"," +
-                                     "\"interestType\": \"Forest\"," +
-                                     "}" +
-                                 "]," +
-                                 "\"myAddress\": {" +
-                                         "\"id\": \"6250596b-9e58-4246-a895-51ec4b1b3fa4\"," +
-                                         "\"street1\": \"One Big Tree House Way\"," +
-                                         "\"street2\": \"\"," +
-                                         "\"city\": \"Forbidden\"," +
-                                         "\"state\": \"Florida\"," +
-                                         "\"country\": \"United States\"," +
-                                         "\"zipCode\": \"98798\"," +
-                                    "}" +
-                                 "}";
 
-            // Arrange
-            var request = new
+            var testInterest = new InterestDto
             {
-                Url = "/api/Users",
-                Body = new StringContent(stringjsonData, Encoding.UTF8, "application/json")
+                Id = Guid.NewGuid().ToString(),
+                InterestName = "Vine Swinging",
+                InterestType = "Outdoors"
             };
 
-            // Act
-            var response = await _client.PostAsync(request.Url, ContentHelper.GetStringContent(request.Body));
-            var value = await response.Content.ReadAsStringAsync();
+            var listOfTestInterests = new List<InterestDto> {testInterest};
 
-            // Assert
-            response.EnsureSuccessStatusCode();
+            var testUser = new UserDto
+            {
+                FirstName = "Jane",
+                LastName = "Tarzan",
+                Id = Guid.NewGuid().ToString(),
+                MyAddress = new AddressDto
+                {
+                    City = "Forbidden",
+                    Country = "United States",
+                    Id = Guid.NewGuid().ToString(),
+                    State = "Florida",
+                    Street1 = "One Big Tree House Way",
+                    Street2 = string.Empty,
+                    ZipCode = "98798"
+                },
+                MyInterests = listOfTestInterests
+            };
+
+            var requestMessage = JsonConvert.SerializeObject(testUser);
+            var content = new StringContent(requestMessage, Encoding.UTF8, "application/json");
+            var response = await _client.PostAsync("/api/Users", content);
+            var returnedMessage = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine(returnedMessage);
+
+            // Handle response status
+            await response.EnsureSuccessStatusCodeAsync();
         }
 
     }

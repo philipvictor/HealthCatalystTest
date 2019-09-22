@@ -207,7 +207,7 @@ namespace HealthCatalystUserSearchAPI.Controllers
         private Addresses DetermineTheAddressForPost(UserDto user)
         {
             var existingAddress = _context.Addresses
-                .First(z => z.City.Equals(user.MyAddress.City, StringComparison.InvariantCultureIgnoreCase) &&
+                .FirstOrDefault(z => z.City.Equals(user.MyAddress.City, StringComparison.InvariantCultureIgnoreCase) &&
                             z.Country.Equals(user.MyAddress.Country, StringComparison.InvariantCultureIgnoreCase) &&
                             z.State.Equals(user.MyAddress.State, StringComparison.InvariantCultureIgnoreCase) &&
                             z.Street1.Equals(user.MyAddress.Street1, StringComparison.InvariantCultureIgnoreCase) &&
@@ -237,7 +237,7 @@ namespace HealthCatalystUserSearchAPI.Controllers
             var newInterests = _mapper.Map<ICollection<Interests>>(user.MyInterests);
             foreach (var interest in newInterests)
             {
-                var existingInterest = _context.Interests.First(f => f.InterestName.Equals(interest.InterestName) && f.InterestType.Equals(interest.InterestType));
+                var existingInterest = _context.Interests.FirstOrDefault(f => f.InterestName.Equals(interest.InterestName) && f.InterestType.Equals(interest.InterestType));
 
                 if (existingInterest == null)
                 {
